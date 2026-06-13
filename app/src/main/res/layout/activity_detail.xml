@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/tv_place_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:text="포인트 이름"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/tv_tide"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="물때: "
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/tv_target_fish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="대상어종: "
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/tv_total_index"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#0056B3"
+        android:text="바다낚시지수: " />
+
+</LinearLayout>

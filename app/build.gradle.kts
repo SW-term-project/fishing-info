@@ -35,6 +35,8 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        viewBinding = true
+        dataBinding = true
     }
 }
 
@@ -51,4 +53,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // Naver Map SDK
     implementation("com.naver.maps:map-sdk:3.23.2")
+    // Retrofit & JSON 파싱용
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Coroutine (비동기 처리)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 }
