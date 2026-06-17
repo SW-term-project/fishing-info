@@ -1,4 +1,4 @@
-package com.example.fisinginfo.data.remote
+package com.example.fisinginfo.data.api
 
 import com.example.fisinginfo.data.model.FishingResponse
 import retrofit2.Response
@@ -10,9 +10,9 @@ interface FishingApiService {
     @GET("1192136/fcstFishingv2/GetFcstFishingApiServicev2")
     suspend fun getFishingInfo(
         @Query("serviceKey", encoded = true) serviceKey: String, // 인증키 (이미 인코딩된 키면 encoded=true)
-        @Query("pageNo") pageNo: Int = 1,
-        @Query("numOfRows") numOfRows: Int = 10,
+        @Query("pageNo") pageNo: Int,
+        @Query("numOfRows") numOfRows: Int = 150,
         @Query("type") type: String = "json",
-        @Query("gubun") gubun: String = "갯바위" // 구분: 갯바위 또는 선상
+        @Query("gubun") gubun: String = "갯바위"
     ): Response<FishingResponse>
 }

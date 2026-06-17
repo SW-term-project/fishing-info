@@ -1,9 +1,9 @@
-package com.example.fisinginfo.data.remote
+package com.example.fisinginfo.data.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
+object FishingRetrofitClient {
     private const val BASE_URL = "https://apis.data.go.kr/"
 
     val apiService: FishingApiService by lazy {
