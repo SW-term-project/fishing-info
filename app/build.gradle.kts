@@ -60,4 +60,7 @@ dependencies {
     // Coroutine (비동기 처리)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // 구글 위치 라이브러리
+    implementation("com.google.android.gms:play-services-location:21.2.0")
 }
