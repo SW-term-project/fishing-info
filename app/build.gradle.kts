@@ -63,4 +63,13 @@ dependencies {
 
     // 구글 위치 라이브러리
     implementation("com.google.android.gms:play-services-location:21.2.0")
+
+    // TensorFlow Lite
+    implementation("org.tensorflow:tensorflow-lite:2.13.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.13.0")
+
+    // 카메라/갤러리
+    implementation("androidx.camera:camera-core:1.2.3")
+    implementation("androidx.camera:camera-camera2:1.2.3")
+    implementation("androidx.camera:camera-lifecycle:1.2.3")
 }
