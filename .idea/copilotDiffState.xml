@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
+              <option name="originalContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&#10;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;&#10;    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;&#10;    &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;&#10;    &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;&#10;    &lt;application&#10;        android:allowBackup=&quot;true&quot;&#10;        android:dataExtractionRules=&quot;@xml/data_extraction_rules&quot;&#10;        android:fullBackupContent=&quot;@xml/backup_rules&quot;&#10;        android:icon=&quot;@mipmap/ic_launcher&quot;&#10;        android:label=&quot;@string/app_name&quot;&#10;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;&#10;        android:supportsRtl=&quot;true&quot;&#10;        android:theme=&quot;@style/Theme.FisingInfo&quot;&#10;        tools:targetApi=&quot;31&quot;&gt;&#10;        &lt;activity&#10;            android:name=&quot;.ui.main.MainActivity&quot;&#10;            android:exported=&quot;true&quot;&gt;&#10;            &lt;intent-filter&gt;&#10;                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;&#10;&#10;                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;&#10;            &lt;/intent-filter&gt;&#10;        &lt;/activity&gt;&#10;        &lt;activity android:name=&quot;.ui.detail.DetailActivity&quot; /&gt;&#10;        &lt;meta-data&#10;            android:name=&quot;com.naver.maps.map.NCP_KEY_ID&quot;&#10;            android:value=&quot;6ub7otzado&quot; /&gt;&#10;    &lt;/application&gt;&#10;&#10;&lt;/manifest&gt;" />
+              <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&#10;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;&#10;    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;&#10;    &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;&#10;    &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;&#10;    &lt;application&#10;        android:allowBackup=&quot;true&quot;&#10;        android:dataExtractionRules=&quot;@xml/data_extraction_rules&quot;&#10;        android:fullBackupContent=&quot;@xml/backup_rules&quot;&#10;        android:icon=&quot;@mipmap/ic_launcher&quot;&#10;        android:label=&quot;@string/app_name&quot;&#10;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;&#10;        android:supportsRtl=&quot;true&quot;&#10;        android:theme=&quot;@style/Theme.FisingInfo&quot;&#10;        tools:targetApi=&quot;31&quot;&gt;&#10;        &lt;activity&#10;            android:name=&quot;.ui.main.MainActivity&quot;&#10;            android:exported=&quot;true&quot;&gt;&#10;            &lt;intent-filter&gt;&#10;                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;&#10;&#10;                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;&#10;            &lt;/intent-filter&gt;&#10;        &lt;/activity&gt;&#10;        &lt;activity android:name=&quot;.ui.detail.DetailActivity&quot; /&gt;&#10;        &lt;activity android:name=&quot;.ui.identify.IdentifyActivity&quot; /&gt;&#10;        &lt;meta-data&#10;            android:name=&quot;com.naver.maps.map.NCP_KEY_ID&quot;&#10;            android:value=&quot;6ub7otzado&quot; /&gt;&#10;    &lt;/application&gt;&#10;&#10;&lt;/manifest&gt;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/fisinginfo/ui/identify/IdentifyActivity.kt">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/java/com/example/fisinginfo/ui/identify/IdentifyActivity.kt" />
+              <option name="updatedContent" value="package com.example.fisinginfo.ui.identify&#10;&#10;import android.os.Bundle&#10;import android.widget.ImageView&#10;import androidx.appcompat.app.AppCompatActivity&#10;import com.example.fisinginfo.R&#10;&#10;class IdentifyActivity : AppCompatActivity() {&#10;    override fun onCreate(savedInstanceState: Bundle?) {&#10;        super.onCreate(savedInstanceState)&#10;        setContentView(R.layout.activity_identify)&#10;&#10;        // 우상단 뒤로가기 버튼&#10;        findViewById&lt;ImageView&gt;(R.id.btn_back)?.setOnClickListener {&#10;            finish()&#10;        }&#10;    }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/layout/activity_identify.xml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/layout/activity_identify.xml" />
+              <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&#10;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;&#10;    android:layout_width=&quot;match_parent&quot;&#10;    android:layout_height=&quot;match_parent&quot;&gt;&#10;&#10;    &lt;!-- 우상단 뒤로가기 버튼만 배치, 나머지는 빈 화면 --&gt;&#10;    &lt;ImageView&#10;        android:id=&quot;@+id/btn_back&quot;&#10;        android:layout_width=&quot;40dp&quot;&#10;        android:layout_height=&quot;40dp&quot;&#10;        android:padding=&quot;8dp&quot;&#10;        android:src=&quot;@drawable/ic_arrow_back&quot;&#10;        app:tint=&quot;@android:color/black&quot;&#10;        app:layout_constraintTop_toTopOf=&quot;parent&quot;&#10;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;&#10;        android:layout_margin=&quot;16dp&quot;&#10;        android:contentDescription=&quot;@string/back_desc&quot; /&gt;&#10;&#10;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;&#10;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+              <option name="originalContent" value="&lt;resources&gt;&#10;    &lt;string name=&quot;app_name&quot;&gt;FisingInfo&lt;/string&gt;&#10;    &lt;string name=&quot;search_hint&quot;&gt;대상 어종 검색 (예: 감성돔)&lt;/string&gt;&#10;    &lt;string name=&quot;camera_desc&quot;&gt;카메라 버튼&lt;/string&gt;&#10;    &lt;string name=&quot;search_desc&quot;&gt;검색 버튼&lt;/string&gt;&#10;&lt;/resources&gt;" />
+              <option name="updatedContent" value="&lt;resources&gt;&#10;    &lt;string name=&quot;app_name&quot;&gt;FisingInfo&lt;/string&gt;&#10;    &lt;string name=&quot;search_hint&quot;&gt;대상 어종 검색 (예: 감성돔)&lt;/string&gt;&#10;    &lt;string name=&quot;camera_desc&quot;&gt;카메라 버튼&lt;/string&gt;&#10;    &lt;string name=&quot;search_desc&quot;&gt;검색 버튼&lt;/string&gt;&#10;    &lt;string name=&quot;back_desc&quot;&gt;뒤로가기&lt;/string&gt;&#10;&lt;/resources&gt;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

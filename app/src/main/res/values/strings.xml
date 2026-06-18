@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FisingInfo</string>
+    <string name="search_hint">대상 어종 검색 (예: 감성돔)</string>
+    <string name="camera_desc">카메라 버튼</string>
+    <string name="search_desc">검색 버튼</string>
+    <string name="back_desc">뒤로가기</string>
 </resources>

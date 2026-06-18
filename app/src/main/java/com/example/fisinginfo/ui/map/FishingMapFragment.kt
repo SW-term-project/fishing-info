@@ -131,7 +131,15 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
     private fun setupSearch() {
         val etSearch = requireView().findViewById<EditText>(R.id.et_search_fish)
         val btnSearch = requireView().findViewById<ImageView>(R.id.btn_search)
+        // 새로 추가한 카메라 버튼 참조
+        val btnCamera = requireView().findViewById<ImageView>(R.id.btn_camera)
         val rv = requireView().findViewById<RecyclerView>(R.id.rv_search_results)
+
+        // 카메라 버튼 클릭: IdentifyActivity로 이동
+        btnCamera.setOnClickListener {
+            val intent = Intent(requireContext(), com.example.fisinginfo.ui.identify.IdentifyActivity::class.java)
+            startActivity(intent)
+        }
 
         btnSearch.setOnClickListener {
             val keyword = etSearch.text.toString().trim()
