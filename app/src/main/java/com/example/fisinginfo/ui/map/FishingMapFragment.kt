@@ -13,6 +13,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
+import android.app.Activity
 import com.example.fisinginfo.R
 import com.example.fisinginfo.data.api.FishingRetrofitClient
 import com.example.fisinginfo.data.model.FishingItem
@@ -31,6 +34,16 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.util.FusedLocationSource
 
 class FishingMapFragment : Fragment(), OnMapReadyCallback {
+
+    // Activity Result launcher to start IdentifyActivity and receive search keyword
+    private val identifyLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val keyword = result.data?.getStringExtra("SEARCH_KEYWORD")
+            if (!keyword.isNullOrBlank()) {
+                performSearch(keyword)
+            }
+        }
+    }
 
     private lateinit var naverMap: NaverMap
     private val markerList = mutableListOf<Marker>() // 마커 메모리 증발 방지용 리스트
@@ -135,10 +148,10 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
         val btnCamera = requireView().findViewById<ImageView>(R.id.btn_camera)
         val rv = requireView().findViewById<RecyclerView>(R.id.rv_search_results)
 
-        // 카메라 버튼 클릭: IdentifyActivity로 이동
+        // 카메라 버튼 클릭: IdentifyActivity로 이동 (결과를 받아 자동 검색 수행)
         btnCamera.setOnClickListener {
             val intent = Intent(requireContext(), com.example.fisinginfo.ui.identify.IdentifyActivity::class.java)
-            startActivity(intent)
+            identifyLauncher.launch(intent)
         }
 
         btnSearch.setOnClickListener {
@@ -169,6 +182,38 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
                 // 검색된 낚시터만 지도에 마커로 남기기
                 drawMarkers(searchResult, moveCamera = true)
             }
+        }
+
+        // Arguments에서 검색 키워드 확인 (MapPageFragment에서 전달된 경우)
+        // View가 완전히 준비된 후에 검색 수행
+        val searchKeyword = arguments?.getString("SEARCH_KEYWORD")
+        if (!searchKeyword.isNullOrBlank()) {
+            view?.post {
+                try {
+                    etSearch.setText(searchKeyword)
+                    btnSearch.performClick()
+                } catch (e: Exception) {
+                    Log.e("FishingMapFragment", "Auto search error", e)
+                }
+            }
+        }
+    }
+
+    // 외부에서 호출 가능: 어종명으로 검색 수행
+    fun performSearch(speciesName: String) {
+        try {
+            view?.post {
+                try {
+                    val etSearch = requireView().findViewById<EditText>(R.id.et_search_fish)
+                    val btnSearch = requireView().findViewById<ImageView>(R.id.btn_search)
+                    etSearch.setText(speciesName)
+                    btnSearch.performClick()
+                } catch (e: Exception) {
+                    Log.e("FishingMapFragment", "performSearch inner error", e)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FishingMapFragment", "performSearch error", e)
         }
     }
 

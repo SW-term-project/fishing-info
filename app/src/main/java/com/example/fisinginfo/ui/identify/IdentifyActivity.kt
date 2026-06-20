@@ -27,6 +27,17 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager2.widget.CompositePageTransformer
+import androidx.viewpager2.widget.MarginPageTransformer
+import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.abs
+import com.example.fisinginfo.data.local.AppDatabase
+import com.example.fisinginfo.data.local.SpeciesEntity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class IdentifyActivity : AppCompatActivity() {
     companion object {
@@ -50,6 +61,7 @@ class IdentifyActivity : AppCompatActivity() {
     private lateinit var llButtonConfirm: LinearLayout
     private lateinit var cvResult: View
     private lateinit var tvResult: TextView
+    private lateinit var vpSpecies: ViewPager2
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         // 사용자가 이미지를 선택하면 실행되는 콜백
@@ -77,6 +89,7 @@ class IdentifyActivity : AppCompatActivity() {
         setupClickListeners()
         loadTFLiteModel()
         requestPermissions()
+        initializeDatabase()
     }
 
     private fun initializeViews() {
@@ -88,6 +101,7 @@ class IdentifyActivity : AppCompatActivity() {
         llButtonConfirm = findViewById(R.id.ll_button_group_confirm)
         cvResult = findViewById(R.id.cv_result)
         tvResult = findViewById(R.id.tv_result)
+        vpSpecies = findViewById(R.id.vp_species)
     }
 
     private fun setupClickListeners() {
@@ -118,16 +132,20 @@ class IdentifyActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        )
-        val permissionsToRequest = mutableListOf<String>()
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(permission)
-            }
+        val permissions = mutableListOf<String>()
+        permissions.add(Manifest.permission.CAMERA)
+
+        // 안드로이드 13(API 33) 이상 대응
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
+
+        val permissionsToRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
         if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), PERMISSION_REQUEST_CODE)
         }
@@ -137,24 +155,42 @@ class IdentifyActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            for (result in grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
-                    return
-                }
+            // 1. 이번 요청 목록(permissions)에 카메라 권한이 포함되어 있는지 확인
+            val cameraIndex = permissions.indexOf(Manifest.permission.CAMERA)
+
+            // 2. 카메라 권한이 요청 목록에 있었고, 그 결과가 거부(DENIED)인 경우에만 토스트 표시
+            if (cameraIndex != -1 && grantResults[cameraIndex] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "카메라 권한이 거부되었습니다. 설정에서 허용해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun openCamera() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (intent.resolveActivity(packageManager) != null) {
+        // 1. 권한 체크
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions()
+            return
+        }
+
+        try {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             val photoFile = createImageFile()
+
             if (photoFile != null) {
-                currentImageUri = FileProvider.getUriForFile(this, "com.example.fisinginfo.fileprovider", photoFile)
+                // 2. FileProvider 호출 (Manifest의 authorities와 일치해야 함)
+                currentImageUri = FileProvider.getUriForFile(
+                    this,
+                    "com.example.fisinginfo.fileprovider",
+                    photoFile
+                )
+
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, currentImageUri)
+                // 3. startActivityForResult 실행
                 startActivityForResult(intent, CAMERA_REQUEST_CODE)
             }
+        } catch (e: Exception) {
+            Log.e("CameraError", "카메라 실행 실패: ${e.message}")
+            Toast.makeText(this, "카메라를 실행할 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -180,8 +216,15 @@ class IdentifyActivity : AppCompatActivity() {
             when (requestCode) {
                 CAMERA_REQUEST_CODE -> {
                     currentImageUri?.let { uri ->
-                        selectedBitmap = BitmapFactory.decodeFile(uri.path)
-                        displaySelectedImage()
+                        try {
+                            // uri.path 대신 스트림을 사용하여 비트맵 생성
+                            contentResolver.openInputStream(uri)?.use { inputStream ->
+                                selectedBitmap = BitmapFactory.decodeStream(inputStream)
+                            }
+                            displaySelectedImage()
+                        } catch (e: Exception) {
+                            Log.e("Camera", "이미지 가져오기 실패", e)
+                        }
                     }
                 }
                 GALLERY_REQUEST_CODE -> {
@@ -219,6 +262,13 @@ class IdentifyActivity : AppCompatActivity() {
         cvResult.visibility = View.GONE
         selectedBitmap = null
         currentImageUri = null
+        // 뷰페이저 숨기기 및 어댑터 제거
+        try {
+            vpSpecies.adapter = null
+            vpSpecies.visibility = View.GONE
+        } catch (e: Exception) {
+            Log.w("IdentifyActivity", "vpSpecies hide error", e)
+        }
     }
 
     private fun loadTFLiteModel() {
@@ -323,6 +373,129 @@ class IdentifyActivity : AppCompatActivity() {
         tvResult.text = "${result.first}"
         tvMatchPercent.text = "${String.format("%.1f", result.second * 100)}% match"
         llMatchBadge.visibility = View.VISIBLE
+
+        // 분석된 어종 이름으로 로컬 DB에서 정보를 불러와서 ViewPager를 구성
+        val speciesName = result.first
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getInstance(applicationContext)
+            val species: SpeciesEntity? = try {
+                db.speciesDao().getSpeciesByName(speciesName)
+            } catch (e: Exception) {
+                null
+            }
+
+            withContext(Dispatchers.Main) {
+                if (species == null) {
+                    // DB에 정보가 없으면 사용자에게 알리고 빈 페이지들을 보여줌
+                    Toast.makeText(this@IdentifyActivity, "로컬 DB에 ${speciesName} 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+
+                // 어종 정보를 adapter에 넣어 ViewPager를 보여줌
+                val adapter = SpeciesPagerAdapter(this@IdentifyActivity, species)
+                vpSpecies.adapter = adapter
+
+                // 양옆 페이지의 일부가 보이도록 RecyclerView 내부 설정
+                vpSpecies.offscreenPageLimit = 1 // 양옆 페이지를 미리 로드
+
+                // RecyclerView(내부) 참조해서 패딩과 클립 설정
+                (vpSpecies.getChildAt(0) as? RecyclerView)?.let { recycler ->
+                    recycler.clipToPadding = false
+                    recycler.clipChildren = false
+                    val pageOffsetPx = (resources.displayMetrics.density * 10).toInt()
+                    val pageMarginPx = (resources.displayMetrics.density * 4).toInt()
+                    recycler.setPadding(pageOffsetPx, 0, pageOffsetPx, 0)
+                    recycler.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+
+                    // Composite transformer: margin + scale
+                    val composite = CompositePageTransformer()
+                    composite.addTransformer(MarginPageTransformer(pageMarginPx))
+                    composite.addTransformer { page, position ->
+                        val r = 1 - abs(position)
+                        page.scaleY = 0.85f + r * 0.15f
+                    }
+                    vpSpecies.setPageTransformer(composite)
+                } ?: run {
+                    // fallback simple transformer
+                    vpSpecies.setPageTransformer { page, position ->
+                        page.alpha = 0.7f + (1f - abs(position)) * 0.3f
+                    }
+                }
+
+                vpSpecies.visibility = View.VISIBLE
+                // 최초로 떠있는 뷰페이저는 어종사진(인덱스 1)
+                vpSpecies.setCurrentItem(1, false)
+            }
+        }
+    }
+
+    private fun initializeDatabase() {
+        // SharedPreferences를 사용해 처음 한 번만 DB 초기화
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val isDbInitialized = prefs.getBoolean("db_initialized", false)
+
+        if (!isDbInitialized) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val db = AppDatabase.getInstance(applicationContext)
+                    val dao = db.speciesDao()
+
+                    val species = listOf(
+                        SpeciesEntity(
+                            speciesName = "감성돔",
+                            avgLength = "30~45 cm",
+                            avgWeight = "0.8~1.5 kg",
+                            depth = "5~15 m",
+                            bestSeasons = "autumn,winter",
+                            fishingMethods = "1. 구멍 찌낚시\n2. 막대찌 낚시\n3. 카고 낚시",
+                            imageUrl = "https://i.namu.wiki/i/wDl-Uxi_exJb0puOjlIDnNRnLKeAQoWbDX-Tm5Ab1WUTLhrWMoPR85sm3zKrN3tq7OJIixscsJy8t5_Tp4daRg.webp"
+                        ),
+                        SpeciesEntity(
+                            speciesName = "조피볼락",
+                            avgLength = "30~40 cm",
+                            avgWeight = "0.5~1.2 kg",
+                            depth = "10~40 m",
+                            bestSeasons = "spring,autumn",
+                            fishingMethods = "선상 다운샷\n 릴 찌낚시\n 묶음추 원투",
+                            imageUrl = "https://cdn.suhyupnews.co.kr/news/photo/202307/30674_26102_5555.jpg"
+                        ),
+                        SpeciesEntity(
+                            speciesName = "광어",
+                            avgLength = "40~60 cm",
+                            avgWeight = "1.0~3.0 kg",
+                            depth = "10~50 m",
+                            bestSeasons = "spring,autumn",
+                            fishingMethods = " 루어 다운샷\n 프리리그\n 메탈지그",
+                            imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUY7P3xUSrLE7f6LQ5Fyehrm_Sv6nBj7ksuOflE9ZusA&s=10"
+                        ),
+                        SpeciesEntity(
+                            speciesName = "참돔",
+                            avgLength = "40~70 cm",
+                            avgWeight = "1.5~4.0 kg",
+                            depth = "30~80 m",
+                            bestSeasons = "spring,summer,autumn",
+                            fishingMethods = " 루어\n 전유동 찌낚시\n 카고",
+                            imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkKQnfdzVKBri_d6qTKRRmxn_3DYVV1FqBfhxlvTl1Tw&s=10"
+                        ),
+                        SpeciesEntity(
+                            speciesName = "돌돔",
+                            avgLength = "35~50 cm",
+                            avgWeight = "1.5~3.0 kg",
+                            depth = "10~30 m",
+                            bestSeasons = "summer,autumn",
+                            fishingMethods = " 원투낚시\n 민장대 맥낚시",
+                            imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnIplGAq0F1mB9IRSJhg6vOii9kpB64K7JxPNo_8wQsg&s=10"
+                        )
+                    )
+
+                    dao.insertAll(species)
+                    prefs.edit().putBoolean("db_initialized", true).apply()
+                    Log.d("DB_INIT", "DB 초기화 완료: ${species.size}개 어종 데이터 삽입됨")
+
+                } catch (e: Exception) {
+                    Log.e("DB_INIT", "DB 초기화 실패", e)
+                }
+            }
+        }
     }
 
     override fun onDestroy() {

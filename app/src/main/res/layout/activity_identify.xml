@@ -114,6 +114,18 @@
                 </LinearLayout>
             </FrameLayout>
         </androidx.cardview.widget.CardView>
+        <!-- ViewPager2: 분석 결과 아래에 어종 관련 상세 페이지들을 좌우로 넘겨볼 수 있게 추가 -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/vp_species"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:clipToPadding="false"
+            app:layout_constraintTop_toBottomOf="@id/cv_result" />
 
         <!-- 카메라/갤러리 버튼 (처음 상태) -->
         <LinearLayout
