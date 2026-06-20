@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 현재 코드에서 사용하는 getExternalFilesDir 대응 -->
+    <external-files-path name="my_images" path="Pictures" />
+
+    <!-- 캐시 및 기타 경로 대응 (기존 내용 포함) -->
+    <cache-path name="cache_path" path="/" />
+    <external-cache-path name="external_cache" path="/" />
+    <external-path name="external_root" path="." />
+</paths>
