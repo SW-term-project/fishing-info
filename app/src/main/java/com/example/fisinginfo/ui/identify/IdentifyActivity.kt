@@ -272,21 +272,22 @@ class IdentifyActivity : AppCompatActivity() {
 
         val results = outputArray[0]
         var maxIndex = 0
-        var maxConfidence = 0.0f
+        var maxConfidence = -1.0f
 
         for (i in results.indices) {
-            if (results[i] > maxConfidence) {
-                maxConfidence = results[i].toFloat()
+            val confidence = (results[i].toInt() and 0xFF) / 255.0f
+            if (confidence > maxConfidence) {
+                maxConfidence = confidence
                 maxIndex = i
             }
         }
 
         val labels = arrayOf(
-            "Black porgy (감성돔)",
-            "Korea rockfish (조피볼락)",
-            "Olive flounder (광어)",
-            "Red seabream (참돔)",
-            "Rock bream (돌돔)"
+            "감성돔",
+            "조피볼락",
+            "광어",
+            "참돔",
+            "돌돔"
         )
 
         return Pair(labels[maxIndex], maxConfidence)
@@ -319,7 +320,7 @@ class IdentifyActivity : AppCompatActivity() {
     }
 
     private fun displayAnalysisResult(result: Pair<String, Float>) {
-        tvResult.text = "${result.first} (해당 확률: ${String.format("%.1f", result.second * 100)}%)"
+        tvResult.text = "${result.first}"
         tvMatchPercent.text = "${String.format("%.1f", result.second * 100)}% match"
         llMatchBadge.visibility = View.VISIBLE
     }
