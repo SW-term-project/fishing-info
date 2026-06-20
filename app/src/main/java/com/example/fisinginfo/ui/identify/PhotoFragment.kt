@@ -17,6 +17,13 @@ import com.example.fisinginfo.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import android.graphics.drawable.Drawable
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.DataSource
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -55,21 +62,36 @@ class PhotoFragment : Fragment() {
         btnDownload = view.findViewById(R.id.btn_download_image)
         progressBar = view.findViewById(R.id.pb_photo)
 
-        // 이미지가 있으면 비동기로 로드
+        // 이미지가 있으면 Glide로 로드
         imageUrl?.let { url ->
             progressBar.visibility = View.VISIBLE
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val bitmap = loadBitmapFromUrl(url)
-                    withContext(Dispatchers.Main) {
-                        ivPhoto.setImageBitmap(bitmap)
-                        progressBar.visibility = View.GONE
+            Glide.with(this)
+                .load(url)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Log.e("PhotoFragment", "이미지 로드 실패", e)
+                        progressBar.post { progressBar.visibility = View.GONE }
+                        return false // allow Glide to handle error placeholder if any
                     }
-                } catch (e: Exception) {
-                    Log.e("PhotoFragment", "이미지 로드 실패", e)
-                    withContext(Dispatchers.Main) { progressBar.visibility = View.GONE }
-                }
-            }
+
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        progressBar.post { progressBar.visibility = View.GONE }
+                        return false
+                    }
+                })
+                .into(ivPhoto)
         }
 
         btnDownload.setOnClickListener {
@@ -94,18 +116,6 @@ class PhotoFragment : Fragment() {
         }
     }
 
-    private fun loadBitmapFromUrl(src: String): android.graphics.Bitmap? {
-        var connection: HttpURLConnection? = null
-        return try {
-            val url = URL(src)
-            connection = url.openConnection() as HttpURLConnection
-            connection.doInput = true
-            connection.connect()
-            val input: InputStream = connection.inputStream
-            android.graphics.BitmapFactory.decodeStream(input)
-        } finally {
-            connection?.disconnect()
-        }
-    }
+    // Glide 사용으로 더 이상 수동 네트워크 처리 함수가 필요하지 않습니다.
 }
 
