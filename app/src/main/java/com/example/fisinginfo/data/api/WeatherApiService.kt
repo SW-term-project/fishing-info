@@ -11,7 +11,7 @@ interface WeatherApiService {
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String,
-        @Query("units") units: String = "metric", // 섭씨 온도를 받기 위해 필수!
-        @Query("lang") lang: String = "kr"        // 날씨 설명을 한글로 받기 위해 설정
+        @Query("units") units: String = "metric",
+        @Query("lang") lang: String = "kr"
     ): Response<WeatherResponse>
 }

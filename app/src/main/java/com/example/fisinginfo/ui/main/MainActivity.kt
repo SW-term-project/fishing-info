@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // ✨ 메인 화면(main_container) 위에 방금 만든 지도 프래그먼트를 딱 올려줌
+        //  메인 화면(main_container) 위에 방금 만든 지도 프래그먼트를  올려줌
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.main_container, FishingMapFragment())

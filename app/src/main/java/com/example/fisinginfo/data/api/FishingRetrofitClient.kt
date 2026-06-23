@@ -9,7 +9,7 @@ object FishingRetrofitClient {
     val apiService: FishingApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create()) // JSON을 Kotlin 객체로 자동 변환
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(FishingApiService::class.java)
     }

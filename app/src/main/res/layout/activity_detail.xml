@@ -221,7 +221,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="오늘의 조과를 기대해 볼까요?"
+                    android:text="오늘의 낚시 지수"
                     android:textColor="#666666"
                     android:textSize="14sp" />
             </LinearLayout>

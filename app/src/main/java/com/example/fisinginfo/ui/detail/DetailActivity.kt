@@ -25,9 +25,8 @@ class DetailActivity : AppCompatActivity() {
         val targetFish = intent.getStringExtra("TARGET_FISH") ?: "정보 없음"
         val totalIndex = intent.getStringExtra("TOTAL_INDEX") ?: "정보 없음"
 
-        // ✨ 여기서 앞 화면에서 넘겨준 위도/경도를 꼭 받아야 날씨 통신이 가능함!
         val lat = intent.getDoubleExtra("LAT", 0.0)
-        val lon = intent.getDoubleExtra("LOT", 0.0) // 앞 화면에서 넘긴 키 값이 LOT인지 LON인지 꼭 확인해!
+        val lon = intent.getDoubleExtra("LOT", 0.0)
 
         // 2. 화면(XML)에 있는 TextView 찾아서 글자 세팅하기
         findViewById<TextView>(R.id.tv_place_name).text = placeName
@@ -35,7 +34,7 @@ class DetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_total_index).text = totalIndex
         findViewById<TextView>(R.id.tv_tide).text = tide
 
-        // 3. ✨ 위경도가 0.0이 아니라 정상적으로 넘어왔다면, 여기서 날씨 API 함수를 실행!
+        // 3. 위경도가 0.0이 아니라 정상적으로 넘어왔다면, 여기서 날씨 API 함수를 실행
         if (lat != 0.0 && lon != 0.0) {
             fetchWeatherData(lat, lon)
         } else {
@@ -44,7 +43,7 @@ class DetailActivity : AppCompatActivity() {
         }
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener {
-            // 현재 화면(DetailActivity)을 종료하고 이전 화면(메인 지도)으로 돌아감!
+            // 현재 화면(DetailActivity)을 종료하고 이전 화면(메인 지도)으로 돌아감
             finish()
         }
     }

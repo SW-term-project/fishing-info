@@ -2,7 +2,6 @@ package com.example.fisinginfo.data.model
 
 import com.google.gson.annotations.SerializedName
 
-// ✨ 실제 데이터는 'response' 없이 바로 header와 body로 시작함!
 data class FishingResponse(
     @SerializedName("header")
     val header: FishingHeader,

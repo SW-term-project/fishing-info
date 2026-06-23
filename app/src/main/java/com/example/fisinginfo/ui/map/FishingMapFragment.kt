@@ -61,7 +61,7 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // ✨ 2. FusedLocationSource 초기화 (권한 팝업을 알아서 띄워주는 꿀템)
+        // FusedLocationSource 초기화 권한 팝업
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
     }
 
@@ -91,16 +91,16 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
 
         naverMap.locationSource = locationSource
 
-        // 1. ✨ [수정] Follow(강제추적) 대신 NoFollow(파란점만 표시하고 카메라는 안 움직임)로 변경!
+        // 1.  [수정] Follow(강제추적) 대신 NoFollow(파란점만 표시하고 카메라는 안 움직임)로 변경
         naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
 
-        // 2. ✨ [추가] 남한 전체가 들어오는 대한민국 중심 좌표와 줌 레벨(5.5) 설정
+        // 2.  [추가] 남한 전체가 들어오는 대한민국 중심 좌표와 줌 레벨(5.5) 설정
         val initialPosition = com.naver.maps.map.CameraPosition(
             com.naver.maps.geometry.LatLng(35.9078, 127.7669), 5.5
         )
         naverMap.cameraPosition = initialPosition
 
-        // 3. ✨ [추가] 유저가 원할 때 자기 위치로 줌인할 수 있게 네이버 기본 '과녁 모양 버튼' 켜기
+        // 3.  [추가] 유저가 원할 때 자기 위치로 줌인할 수 있게 네이버 기본 '과녁 모양 버튼' 켜기
         naverMap.uiSettings.isLocationButtonEnabled = true
 
         setupRecyclerView()
@@ -119,7 +119,7 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    // 1. 리사이클러뷰 세팅
+    // 리사이클러뷰 세팅
     private fun setupRecyclerView() {
         val rv = requireView().findViewById<RecyclerView>(R.id.rv_search_results)
 
@@ -140,7 +140,7 @@ class FishingMapFragment : Fragment(), OnMapReadyCallback {
         rv.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    // 2. 검색창 세팅
+    // 검색창 세팅
     private fun setupSearch() {
         val etSearch = requireView().findViewById<EditText>(R.id.et_search_fish)
         val btnSearch = requireView().findViewById<ImageView>(R.id.btn_search)
