@@ -17,6 +17,10 @@ import com.example.fisinginfo.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.content.ContentValues
+import android.os.Build
+import android.provider.MediaStore
+import java.io.OutputStream
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
@@ -27,6 +31,7 @@ import com.bumptech.glide.load.DataSource
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import android.widget.Toast
 
 class PhotoFragment : Fragment() {
 
@@ -95,16 +100,36 @@ class PhotoFragment : Fragment() {
         }
 
         btnDownload.setOnClickListener {
-            imageUrl?.let { url ->
+            val url = imageUrl
+            if (url.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "이미지 URL이 없습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Glide로 비트맵을 가져와서 MediaStore에 저장 (Android Q+ 권한 필요 없음)
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val dm = requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                    val request = DownloadManager.Request(Uri.parse(url))
-                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        .setAllowedOverMetered(true)
-                        .setTitle("${getString(R.string.app_name)} 이미지 다운로드")
-                    dm.enqueue(request)
+                    val bitmap = Glide.with(requireContext())
+                        .asBitmap()
+                        .load(url)
+                        .submit()
+                        .get()
+
+                    val filename = "fishing_${System.currentTimeMillis()}.jpg"
+                    val savedUri = saveBitmapToMediaStore(filename, bitmap)
+
+                    withContext(Dispatchers.Main) {
+                        if (savedUri != null) {
+                            Toast.makeText(requireContext(), "이미지 저장 완료", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), "이미지 저장 실패", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 } catch (e: Exception) {
-                    Log.e("PhotoFragment", "다운로드 실패", e)
+                    Log.e("PhotoFragment", "다운로드/저장 실패", e)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "이미지 저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -116,6 +141,42 @@ class PhotoFragment : Fragment() {
         }
     }
 
-    // Glide 사용으로 더 이상 수동 네트워크 처리 함수가 필요하지 않습니다.
+    // MediaStore에 비트맵 저장 (이미지)
+    private fun saveBitmapToMediaStore(filename: String, bitmap: android.graphics.Bitmap): Uri? {
+        val resolver = requireContext().contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+
+        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        var imageUri: Uri? = null
+        var stream: OutputStream? = null
+        try {
+            imageUri = resolver.insert(collection, contentValues)
+            if (imageUri == null) return null
+            stream = resolver.openOutputStream(imageUri)
+            if (stream == null) return null
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, stream)
+        } catch (e: Exception) {
+            Log.e("PhotoFragment", "saveBitmapToMediaStore error", e)
+            if (imageUri != null) {
+                try { resolver.delete(imageUri, null, null) } catch (_: Exception) {}
+            }
+            return null
+        } finally {
+            try { stream?.close() } catch (_: Exception) {}
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.clear()
+            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+            try { resolver.update(imageUri!!, contentValues, null, null) } catch (_: Exception) {}
+        }
+        return imageUri
+    }
 }
 
